@@ -1,0 +1,21 @@
+{
+    "name": "Blockchain",
+    "description": "Blockchain infrastructure, RPC management, and event listening.",
+    "namespace": "App\\Modules\\Blockchain",
+    "table_prefix": "blockchain_",
+    "tables": [
+        "blockchain_rpc",
+        "blockchain_check_newblock",
+        "blockchain_transaction_queue",
+        "blockchain_contract",
+        "blockchain_contract_event",
+        "blockchain_events",
+        "blockchain_block",
+        "blockchain_event_error",
+        "blockchain_contract_sender_wallets"
+    ],
+    "field_prefix": "chain_",
+    "version": "1.0.0",
+    "enabled_env": "BLOCKCHAIN_ENABLED"
+}
+
