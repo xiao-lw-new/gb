@@ -182,7 +182,7 @@ class BonusPoolNotifyService
 
     private function getSenderAddress(): ?string
     {
-        $wallet = ContractSenderWallets::where('wallet_name', 'merkle_tree')->first();
+        $wallet = ContractSenderWallets::where('wallet_name', 'market_amount')->first();
         if (!$wallet) {
             $wallet = ContractSenderWallets::where('is_default', 1)->first();
         }
