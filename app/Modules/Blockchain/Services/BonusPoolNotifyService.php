@@ -45,7 +45,7 @@ class BonusPoolNotifyService
                 }
 
                 $amountWei = CommonHelper::toContractValue($item->market_amount, 18);
-                $sender = new ContractSendService('BurnsBonusPool');
+                $sender = new ContractSendService('BurnsBonusPool', 'market_amount');
                 $txHash = $sender->writeContract('notifyReward', [$amountWei]);
 
                 TaxProcessorDispatchLog::where('id', $item->id)->update([
