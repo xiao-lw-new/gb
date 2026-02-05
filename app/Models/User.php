@@ -14,16 +14,6 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    public function vipLevel(): HasOne
-    {
-        return $this->hasOne(MgVipLevel::class, 'user_id');
-    }
-
-    public function specifiedVip(): HasOne
-    {
-        return $this->hasOne(MgSpecifiedVip::class, 'user_id');
-    }
-
     protected $fillable = [
         'name',
         'email',
