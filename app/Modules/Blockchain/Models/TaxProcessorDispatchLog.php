@@ -10,6 +10,7 @@ class TaxProcessorDispatchLog extends Model
     protected $fillable = [
         'chain_id',
         'transaction_hash',
+        'notify_transaction_hash',
         'log_index',
         'block_number',
         'block_time',

@@ -33,6 +33,12 @@ class BlockchainServiceProvider extends ServiceProvider
                 $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
                 $schedule->command('transaction:process-queue --max-batch=20')->everyMinute()->withoutOverlapping();
                 $schedule->command('blockchain:listen-events')->everyMinute()->withoutOverlapping();
+                $schedule->command('blockchain:notify-bonus-pool-send --batch=20')
+                    ->everyMinute()
+                    ->withoutOverlapping();
+                $schedule->command('blockchain:notify-bonus-pool-confirm --confirm-batch=50')
+                    ->everyMinute()
+                    ->withoutOverlapping();
             });
         }
     }
