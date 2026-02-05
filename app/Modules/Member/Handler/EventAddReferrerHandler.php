@@ -37,10 +37,10 @@ class EventAddReferrerHandler implements EventHandler
         } else {
             $referrer = User::where('address', $referrerAddr)->first();
             if (!$referrer) {
-                // 如果推荐人尚未在数据库中，先创建一个静默用户 (status=0)
+                // 如果推荐人尚未在数据库中，创建并直接设为 status=1
                 Log::channel('event_add_referrer')->info("[EventAddReferrerHandler]: Referrer $referrerAddr not found, creating silent user");
                 $referrer = UserHelper::createWithReferral($referrerAddr, 1, [
-                    'status' => 0, 
+                    'status' => 1,
                     'remark' => "Auto created as referrer (UID: $uid)"
                 ]);
             }
@@ -49,6 +49,11 @@ class EventAddReferrerHandler implements EventHandler
         if (!$referrer) {
             Log::channel('event_add_referrer')->error('[EventAddReferrerHandler]: Failed to resolve referrer for user ' . $userAddr);
             return;
+        }
+
+        if ((int) $referrer->status !== 1) {
+            $referrer->status = 1;
+            $referrer->save();
         }
 
         // 2. 获取或处理当前用户 (User)
@@ -67,21 +72,16 @@ class EventAddReferrerHandler implements EventHandler
                 // refresh old + new ancestors (p_id recursion)
                 $newAncestors = $this->getAncestorIdsByPid($user->id);
 
-                // 如果用户状态是 0（临时用户），现在有了真实推荐人，激活为 1
-                if ($user->status == 0) {
+                if ((int) $user->status !== 1) {
                     $user->status = 1;
                     $user->save();
-                    Log::channel('event_add_referrer')->info("[EventAddReferrerHandler]: Activated user $userAddr (status 0 -> 1)");
                 }
             } else {
                 // 即使不满足重绑条件（例如已经是Root且推荐人也是Root，或者已绑定其他推荐人），
                 // 如果用户状态为0，说明是临时用户，在此事件中激活
-                if ($user->status == 0) {
+                if ((int) $user->status !== 1) {
                     $user->status = 1;
                     $user->save();
-                    Log::channel('event_add_referrer')->info("[EventAddReferrerHandler]: User $userAddr exists with p_id " . $user->p_id . ", activated (status 0 -> 1)");
-                } else {
-                    Log::channel('event_add_referrer')->info("[EventAddReferrerHandler]: User $userAddr already exists with p_id " . $user->p_id . ", skipping");
                 }
 
 

@@ -14,28 +14,41 @@ class UserHelper
      */
     public static function createWithReferral(string $address, ?int $pid = 1, array $extra = []): User
     {
-        return DB::transaction(function () use ($address, $pid, $extra) {
-            $address = strtolower($address);
-            $parent = User::find($pid) ?: User::find(1);
-            
-            $user = new User(array_merge([
-                'address' => $address,
-                'p_id'    => $parent->id,
-                'status'  => 1,
-                'name'    => substr($address, 0, 6) . '...' . substr($address, -4)
-            ], $extra));
-            
-            $user->save();
+        $attempts = 0;
+        while (true) {
+            try {
+                return DB::transaction(function () use ($address, $pid, $extra) {
+                    $address = strtolower($address);
+                    $parent = User::find($pid) ?: User::find(1);
+                    
+                    $user = new User(array_merge([
+                        'address' => $address,
+                        'p_id'    => $parent->id,
+                        'status'  => 1,
+                        'name'    => substr($address, 0, 6) . '...' . substr($address, -4)
+                    ], $extra));
+                    
+                    $user->save();
 
-            // 修正：路径包含自己的 ID
-            $user->path = $parent->path . $user->id . '|';
-            $user->save();
+                    // 修正：路径包含自己的 ID
+                    $user->path = $parent->path . $user->id . '|';
+                    $user->save();
 
-            // 维护闭包表关系
-            self::rebuildUserRelations($user);
+                    // 维护闭包表关系
+                    self::rebuildUserRelations($user);
 
-            return $user;
-        });
+                    return $user;
+                });
+            } catch (\Illuminate\Database\QueryException $e) {
+                $attempts++;
+                if ($attempts > 1 || $e->getCode() !== '23505' || !str_contains($e->getMessage(), 'users_pkey')) {
+                    throw $e;
+                }
+
+                // Fix sequence drift after manual imports.
+                self::resetUsersIdSequence();
+            }
+        }
     }
 
     /**
@@ -116,5 +129,12 @@ class UserHelper
             // Use insertOrIgnore to prevent race conditions or duplicates
             UserRelation::insertOrIgnore($insertData);
         }
+    }
+
+    protected static function resetUsersIdSequence(): void
+    {
+        DB::statement(
+            "SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT COALESCE(MAX(id), 1) FROM users), true)"
+        );
     }
 }

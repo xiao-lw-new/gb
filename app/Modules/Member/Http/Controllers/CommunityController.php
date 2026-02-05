@@ -80,6 +80,7 @@ class CommunityController extends BaseApiController
         return (int) DB::table('user_relations')
             ->where('ancestor_id', $userId)
             ->where('distance', '>', 0)
+            ->where('user_id', '!=', $userId)
             ->count();
     }
 
