@@ -39,6 +39,11 @@ class FlapTaxProcessorDispatchExecutedHandler implements EventHandler
 
         $blockNumber = (int) ($meta['block_number'] ?? 0);
         $blockTime = $blockNumber > 0 ? BlockChainHelper::blockTime($blockNumber) : null;
+        $cutoffTimestamp = (new \DateTimeImmutable('2025-02-06 17:00:00', new \DateTimeZone('Asia/Shanghai')))->getTimestamp();
+        if (!$blockTime || $blockTime < $cutoffTimestamp) {
+            Log::channel('event_tax_processor')->info("[FlapTaxProcessorDispatchExecuted]: Skip before cutoff, tx: {$txHash}, block_time: " . ($blockTime ?: 'null'));
+            return;
+        }
 
         $feeAmount = CommonHelper::fromContractValue($feeWei, 18);
         $marketAmount = CommonHelper::fromContractValue($marketWei, 18);
