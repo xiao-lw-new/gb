@@ -42,6 +42,16 @@
   },
   {
     "inputs": [],
+    "name": "ErrorMaxReward",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrorNoStart",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "ErrorRewardAmount",
     "type": "error"
   },
@@ -155,6 +165,12 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "totalQuota",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalSupply",
         "type": "uint256"
       }
     ],
@@ -548,6 +564,11 @@
         "internalType": "uint256",
         "name": "outReward_",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "daiReward_",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -629,7 +650,7 @@
         "type": "uint256"
       }
     ],
-    "name": "notifyRewardExtra",
+    "name": "notifyRewardFirst",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -768,6 +789,19 @@
   },
   {
     "inputs": [],
+    "name": "totalClaimedReward",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "totalNotifyReward",
     "outputs": [
       {
@@ -857,5 +891,9 @@
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
   }
 ]
