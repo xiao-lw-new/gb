@@ -6,7 +6,7 @@ use App\Helpers\CommonHelper;
 use App\Modules\Blockchain\Models\BlockchainContract;
 use App\Modules\Blockchain\Models\BlockchainRpc;
 use App\Modules\Blockchain\Models\ContractSenderWallets;
-use App\Modules\Blockchain\Models\TaxProcessorDispatchLog;
+use App\Modules\Blockchain\Models\FeeDispatchedLog;
 use App\Services\SystemSettingService;
 use Illuminate\Support\Facades\Log;
 use Web3\Contract;
@@ -22,7 +22,7 @@ class BonusPoolNotifyService
             return;
         }
 
-        $pending = TaxProcessorDispatchLog::where('status', 0)
+        $pending = FeeDispatchedLog::where('status', 0)
             ->orderBy('id', 'asc')
             ->limit($limit)
             ->get();
@@ -32,9 +32,9 @@ class BonusPoolNotifyService
         }
 
         foreach ($pending as $item) {
-            /** @var TaxProcessorDispatchLog $item */
+            /** @var FeeDispatchedLog $item */
             try {
-                $locked = TaxProcessorDispatchLog::where('id', $item->id)
+                $locked = FeeDispatchedLog::where('id', $item->id)
                     ->where('status', 0)
                     ->update([
                         'status' => 1,
@@ -44,11 +44,11 @@ class BonusPoolNotifyService
                     continue;
                 }
 
-                $amountWei = CommonHelper::toContractValue($item->market_amount, 18);
-                $sender = new ContractSendService('BurnsBonusPool', 'market_amount');
+                $amountWei = CommonHelper::toContractValue($item->quote_founder, 18);
+                $sender = new ContractSendService('BurnsBonusPool', 'quote_founder');
                 $txHash = $sender->writeContract('notifyReward', [$amountWei]);
 
-                TaxProcessorDispatchLog::where('id', $item->id)->update([
+                FeeDispatchedLog::where('id', $item->id)->update([
                     'notify_transaction_hash' => $txHash,
                     'remark' => 'Transaction submitted',
                 ]);
@@ -56,10 +56,10 @@ class BonusPoolNotifyService
                 Log::channel('chain_event')->info('notifyReward submitted', [
                     'id' => $item->id,
                     'tx_hash' => $txHash,
-                    'amount' => $item->market_amount,
+                    'amount' => $item->quote_founder,
                 ]);
             } catch (\Throwable $e) {
-                TaxProcessorDispatchLog::where('id', $item->id)->update([
+                FeeDispatchedLog::where('id', $item->id)->update([
                     'status' => 3,
                     'remark' => $e->getMessage(),
                 ]);
@@ -78,7 +78,7 @@ class BonusPoolNotifyService
             return;
         }
 
-        $pending = TaxProcessorDispatchLog::where('status', 1)
+        $pending = FeeDispatchedLog::where('status', 1)
             ->whereNotNull('notify_transaction_hash')
             ->orderBy('id', 'asc')
             ->limit($limit)
@@ -93,7 +93,7 @@ class BonusPoolNotifyService
         $fromAddress = $this->getSenderAddress();
 
         foreach ($pending as $item) {
-            /** @var TaxProcessorDispatchLog $item */
+            /** @var FeeDispatchedLog $item */
             try {
                 $receipt = $this->getTransactionReceipt($web3, $item->notify_transaction_hash);
                 if (!$receipt) {
@@ -104,14 +104,14 @@ class BonusPoolNotifyService
                     || (isset($receipt->status) && hexdec($receipt->status) === 1);
 
                 if ($isSuccess) {
-                    TaxProcessorDispatchLog::where('id', $item->id)->update([
+                    FeeDispatchedLog::where('id', $item->id)->update([
                         'status' => 2,
                         'remark' => 'Transaction confirmed',
                     ]);
                     continue;
                 }
 
-                $amountWei = CommonHelper::toContractValue($item->market_amount, 18);
+                $amountWei = CommonHelper::toContractValue($item->quote_founder, 18);
                 $data = $this->buildContractData($web3, $contract, 'notifyReward', [$amountWei]);
                 $revertReason = $this->getRevertReason(
                     $web3,
@@ -121,12 +121,12 @@ class BonusPoolNotifyService
                     $fromAddress
                 );
 
-                TaxProcessorDispatchLog::where('id', $item->id)->update([
+                FeeDispatchedLog::where('id', $item->id)->update([
                     'status' => 3,
                     'remark' => $revertReason ? "Transaction failed: {$revertReason}" : 'Transaction failed',
                 ]);
             } catch (\Throwable $e) {
-                TaxProcessorDispatchLog::where('id', $item->id)->update([
+                FeeDispatchedLog::where('id', $item->id)->update([
                     'status' => 3,
                     'remark' => $e->getMessage(),
                 ]);
@@ -182,7 +182,7 @@ class BonusPoolNotifyService
 
     private function getSenderAddress(): ?string
     {
-        $wallet = ContractSenderWallets::where('wallet_name', 'market_amount')->first();
+        $wallet = ContractSenderWallets::where('wallet_name', 'quote_founder')->first();
         if (!$wallet) {
             $wallet = ContractSenderWallets::where('is_default', 1)->first();
         }

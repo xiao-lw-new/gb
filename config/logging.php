@@ -419,5 +419,11 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 5,
         ],
+        'event_fee_dispatched' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/chain/event_fee_dispatched.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 5,
+        ],
     ],
 ];
