@@ -111,7 +111,7 @@ class BonusPoolNotifyService
                     continue;
                 }
 
-                $amountWei = CommonHelper::toContractValue($item->quote_founder/10000, 18);
+                $amountWei = CommonHelper::toContractValue($item->quote_founder, 18);
                 $data = $this->buildContractData($web3, $contract, 'notifyReward', [$amountWei]);
                 $revertReason = $this->getRevertReason(
                     $web3,
