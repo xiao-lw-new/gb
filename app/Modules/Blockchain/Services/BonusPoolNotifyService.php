@@ -109,6 +109,7 @@ class BonusPoolNotifyService
                         'remark' => 'Transaction confirmed',
                     ]);
                     continue;
+                    
                 }
 
                 $amountWei = CommonHelper::toContractValue($item->quote_founder, 18);
