@@ -155,31 +155,29 @@ class UserGoutInfoSyncService
             return [];
         }
 
-        $arrayOffset = $this->decodeUint(substr($hex, 0, 64));
-        $arrayStart = $arrayOffset * 2;
-
-        $arrayLength = $this->decodeUint(substr($hex, $arrayStart, 64));
+        $arrayStart = (int) ($this->hexToInt(substr($hex, 0, 64)) * 2);
+        $arrayLength = $this->hexToInt(substr($hex, $arrayStart, 64));
         if ($arrayLength === 0) {
             return [];
         }
 
-        $offsetsStart = $arrayStart + 64;
+        $offsetsStart = (int) ($arrayStart + 64);
 
         $result = [];
         for ($i = 0; $i < $arrayLength; $i++) {
-            $tupleOffset = $this->decodeUint(substr($hex, $offsetsStart + $i * 64, 64));
-            $tupleStart = $arrayStart + 64 + $tupleOffset * 2;
+            $pos = (int) ($offsetsStart + $i * 64);
+            $tupleOffset = $this->hexToInt(substr($hex, $pos, 64));
+            $tupleStart = (int) ($arrayStart + 64 + $tupleOffset * 2);
 
-            // address (32 bytes, right-aligned)
             $userHex = substr($hex, $tupleStart, 64);
             $user = '0x' . substr($userHex, 24);
 
-            // uint256 tokenBalance
-            $tokenBalanceHex = ltrim(substr($hex, $tupleStart + 64, 64), '0') ?: '0';
+            $tbPos = (int) ($tupleStart + 64);
+            $tokenBalanceHex = ltrim(substr($hex, $tbPos, 64), '0') ?: '0';
             $tokenBalance = BigInteger::fromBase($tokenBalanceHex, 16)->__toString();
 
-            // uint256 burnToken
-            $burnTokenHex = ltrim(substr($hex, $tupleStart + 128, 64), '0') ?: '0';
+            $btPos = (int) ($tupleStart + 128);
+            $burnTokenHex = ltrim(substr($hex, $btPos, 64), '0') ?: '0';
             $burnToken = BigInteger::fromBase($burnTokenHex, 16)->__toString();
 
             $result[] = [
@@ -192,13 +190,9 @@ class UserGoutInfoSyncService
         return $result;
     }
 
-    /**
-     * 安全解码 ABI 中的小整数偏移/长度值，避免 hexdec 返回 float
-     */
-    private function decodeUint(string $hex64): int
+    private function hexToInt(string $hex64): int
     {
-        $trimmed = ltrim($hex64, '0') ?: '0';
-        return intval(hexdec($trimmed));
+        return (int) BigInteger::fromBase(ltrim($hex64, '0') ?: '0', 16)->toInt();
     }
 
 }
