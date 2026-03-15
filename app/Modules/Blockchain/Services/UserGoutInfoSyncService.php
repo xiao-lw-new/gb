@@ -9,6 +9,7 @@ use App\Modules\Blockchain\Models\BlockchainRpc;
 use App\Modules\Blockchain\Models\EventToBurnLog;
 use App\Modules\Blockchain\Models\UserGoutInfo;
 use App\Services\SystemSettingService;
+use Brick\Math\BigInteger;
 use Illuminate\Support\Facades\Log;
 use kornrunner\Keccak;
 use Web3\Providers\HttpProvider;
@@ -178,12 +179,12 @@ class UserGoutInfoSyncService
             $user = '0x' . substr($userHex, 24);
 
             // uint256 tokenBalance
-            $tokenBalanceHex = substr($hex, $tupleStart + 64, 64);
-            $tokenBalance = $this->hexToBigInt($tokenBalanceHex);
+            $tokenBalanceHex = ltrim(substr($hex, $tupleStart + 64, 64), '0') ?: '0';
+            $tokenBalance = BigInteger::fromBase($tokenBalanceHex, 16)->__toString();
 
             // uint256 burnToken
-            $burnTokenHex = substr($hex, $tupleStart + 128, 64);
-            $burnToken = $this->hexToBigInt($burnTokenHex);
+            $burnTokenHex = ltrim(substr($hex, $tupleStart + 128, 64), '0') ?: '0';
+            $burnToken = BigInteger::fromBase($burnTokenHex, 16)->__toString();
 
             $result[] = [
                 'user' => strtolower($user),
@@ -195,21 +196,4 @@ class UserGoutInfoSyncService
         return $result;
     }
 
-    private function hexToBigInt(string $hex): string
-    {
-        $hex = ltrim($hex, '0');
-        if ($hex === '') {
-            return '0';
-        }
-
-        $result = '0';
-        $base = '1';
-        for ($i = strlen($hex) - 1; $i >= 0; $i--) {
-            $digit = hexdec($hex[$i]);
-            $result = bcadd($result, bcmul((string) $digit, $base));
-            $base = bcmul($base, '16');
-        }
-
-        return $result;
-    }
 }
