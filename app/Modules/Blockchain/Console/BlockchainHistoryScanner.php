@@ -19,7 +19,8 @@ class BlockchainHistoryScanner extends Command
         {--from= : 起始块高度}
         {--to= : 结束块高度}
         {--contract= : 合约名，多个用逗号分隔}
-        {--event= : 事件名，多个用逗号分隔}';
+        {--event= : 事件名，多个用逗号分隔}
+        {--rpc= : 自定义 RPC 地址（用于 archive 节点回填）}';
 
     protected $description = 'Scan historical blockchain events between specified blocks';
 
@@ -53,15 +54,23 @@ class BlockchainHistoryScanner extends Command
         }
 
         $chainId = SystemSettingService::getChainId();
-        $rpc = BlockchainRpc::where('chain_id', $chainId)->where('status', 1)->first();
-        if (! $rpc) {
-            $this->error("No active RPC found for chain_id: {$chainId}");
-            return 1;
+        $customRpc = $this->option('rpc');
+
+        if ($customRpc) {
+            $rpcUrl = $customRpc;
+            $this->info("Using custom RPC: {$rpcUrl}");
+        } else {
+            $rpc = BlockchainRpc::where('chain_id', $chainId)->where('status', 1)->first();
+            if (! $rpc) {
+                $this->error("No active RPC found for chain_id: {$chainId}");
+                return 1;
+            }
+            $rpcUrl = $rpc->provider;
         }
 
-        $web3 = new Web3(new HttpProvider(new HttpRequestManager($rpc->provider, 30)));
+        $web3 = new Web3(new HttpProvider(new HttpRequestManager($rpcUrl, 30)));
 
-        $contracts = BlockchainContract::where('chain_id', $rpc->chain_id)
+        $contracts = BlockchainContract::where('chain_id', $chainId)
             ->where('status', 1)
             ->whereIn('name', $contractNames)
             ->get();
@@ -109,7 +118,9 @@ class BlockchainHistoryScanner extends Command
                 } else {
                     $logs = [];
                     $isError = true;
-                    Log::channel('blockchain')->error("History getLogs error: " . $err->getMessage());
+                    $errMsg = $err->getMessage();
+                    $this->error("getLogs error: {$errMsg}");
+                    Log::channel('blockchain')->error("History getLogs error: " . $errMsg);
                 }
             });
 
@@ -126,7 +137,7 @@ class BlockchainHistoryScanner extends Command
             }
 
             if ($isError) {
-                $this->error('getLogs RPC error, aborting.');
+                $this->error("getLogs RPC error, aborting. Check blockchain log for details.");
                 return 1;
             }
 
