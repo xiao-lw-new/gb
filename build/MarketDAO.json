@@ -3,7 +3,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "COMMUNITY_",
+        "name": "MNFT_",
         "type": "address"
       },
       {
@@ -13,7 +13,12 @@
       },
       {
         "internalType": "address",
-        "name": "LP_TOKEN_BNB_",
+        "name": "MARKET_WALLET_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "MARKET_WALLET_SINGLE_",
         "type": "address"
       }
     ],
@@ -22,12 +27,12 @@
   },
   {
     "inputs": [],
-    "name": "ErrorBurnQuotaExceed",
+    "name": "ErrorAddressZero",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "ErrorClaimedTOKENReward",
+    "name": "ErrorEarlyTokenExists",
     "type": "error"
   },
   {
@@ -37,53 +42,57 @@
   },
   {
     "inputs": [],
+    "name": "ErrorEmptySubscribeNum",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrorEmptyUnStakeAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "ErrorFailTransferNative",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "ErrorInsufficientBalance",
+    "name": "ErrorInvalidUser",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "ErrorMaxReward",
+    "name": "ErrorRewardClaim",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "ErrorNoStart",
+    "name": "ErrorStakeAmount",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "ErrorRewardAmount",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "reward",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "changeAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "ErrorUpdateDai",
+    "name": "ErrorStakeAmountExceed",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "ErrorZeroAmount",
+    "name": "ErrorStakeTime",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrorSubscribeNum",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrorUnsubscribeTime",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrorValue",
     "type": "error"
   },
   {
@@ -97,36 +106,86 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "burnAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "internalType": "address",
-        "name": "referrer",
+        "name": "newToken",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amountToReferrer",
+        "name": "earlyAmount",
         "type": "uint256"
       },
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "referrerROR",
-        "type": "address"
-      },
-      {
-        "indexed": false,
         "internalType": "uint256",
-        "name": "amountToReferrerROR",
+        "name": "totalClaimed",
         "type": "uint256"
       }
     ],
-    "name": "EventBurnToReferrers",
+    "name": "EventBuyEarlyDouble",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "earlyAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalClaimed",
+        "type": "uint256"
+      }
+    ],
+    "name": "EventBuyEarlyNew",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "earlyAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalClaimed",
+        "type": "uint256"
+      }
+    ],
+    "name": "EventBuyEarlySingle",
     "type": "event"
   },
   {
@@ -143,15 +202,9 @@
         "internalType": "uint256",
         "name": "reward",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "claimedPhase",
-        "type": "uint256"
       }
     ],
-    "name": "EventClaimRankRewards",
+    "name": "EventClaimDouble",
     "type": "event"
   },
   {
@@ -168,85 +221,48 @@
         "internalType": "uint256",
         "name": "reward",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "costQuota",
-        "type": "uint256"
       }
     ],
-    "name": "EventClaimRewards",
+    "name": "EventClaimSingle",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newTokenLength",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
         "internalType": "address",
-        "name": "user",
+        "name": "newToken",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "reward",
+        "name": "newAmount",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "lastQuota",
+        "name": "singleAmount",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "lastTOKENQuota",
-        "type": "uint256"
-      }
-    ],
-    "name": "EventClaimTOKENRewards",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
+        "name": "doubleAmount",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "rewardPerTokenStoredOld",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "rewardPerTokenStoredNew",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "rewardAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "totalNotifyReward",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "totalQuota",
+        "name": "rewardPerStoredNew",
         "type": "uint256"
       },
       {
@@ -256,75 +272,7 @@
         "type": "uint256"
       }
     ],
-    "name": "EventNotifyReward",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "phase",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "notifyAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amountRank",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amountBonus",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "totalNotifyRankReward",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "totalNotifyBonusReward",
-        "type": "uint256"
-      }
-    ],
-    "name": "EventNotifyRewardNew",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "rewardAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "rewardTOKENPerStoredNew",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "totalSupply",
-        "type": "uint256"
-      }
-    ],
-    "name": "EventNotifyTOKENReward",
+    "name": "EventNotifyEarlyToken",
     "type": "event"
   },
   {
@@ -339,23 +287,214 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "burnAmount",
+        "name": "amount_",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "addBurnQuota",
+        "name": "time",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "toThisAmount",
+        "name": "userAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalStakeAmount",
         "type": "uint256"
       }
     ],
-    "name": "EventToBurn",
+    "name": "EventStake",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount_",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalStakeAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "EventUnStake",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "num",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "subscribedNum",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "usersEndTime",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "tokenIds_",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "EventUserStakeSingle",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "num",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "subscribedNum",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "bnbAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "usersEndTime",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "tokenIds_",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "EventUserSubscribe",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "num_",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "bnbAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "subscribedNum",
+        "type": "uint256"
+      }
+    ],
+    "name": "EventUserUnSubscribeDouble",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "num_",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "subscribedNumSingle",
+        "type": "uint256"
+      }
+    ],
+    "name": "EventUserUnSubscribeSingle",
     "type": "event"
   },
   {
@@ -448,38 +587,12 @@
   },
   {
     "inputs": [],
-    "name": "BLACK_HOLE",
+    "name": "BNBAMOUNT",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "COMMUNITY",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "COMMUNIT_ROOT",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -500,7 +613,72 @@
   },
   {
     "inputs": [],
-    "name": "LP_TOKEN_BNB",
+    "name": "FROZENTIME",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "LOWESTSTAKE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MARKET_WALLET",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MARKET_WALLET_SINGLE",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAXSTAKE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MNFT",
     "outputs": [
       {
         "internalType": "address",
@@ -526,6 +704,19 @@
   },
   {
     "inputs": [],
+    "name": "STATE_MANAGER",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "TOKEN",
     "outputs": [
       {
@@ -539,7 +730,46 @@
   },
   {
     "inputs": [],
-    "name": "allotedPhases",
+    "name": "TOKENAMOUNT",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TOKENAMOUNT_SINGLE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TOTALNUM",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TOTALNUM_SINGLE",
     "outputs": [
       {
         "internalType": "uint256",
@@ -553,97 +783,79 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "balanceOf",
-    "outputs": [
-      {
         "internalType": "uint256",
-        "name": "",
+        "name": "amount_",
         "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "name": "addDoubleReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount_",
+        "type": "uint256"
+      }
+    ],
+    "name": "addSingleReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "newToken_",
         "type": "address"
       }
     ],
-    "name": "balanceOfTOKEN",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
+    "name": "buyEarlyDouble",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "burnedAmount",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "newToken_",
+        "type": "address"
       }
     ],
-    "stateMutability": "view",
+    "name": "buyEarlyNew",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "burnedQuota",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "newToken_",
+        "type": "address"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "claimRankReward",
+    "name": "buyEarlySingle",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "claimReward",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "name": "claimDouble",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "claimTOKENReward",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "name": "claimSingle",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -651,72 +863,60 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "user_",
+        "name": "",
         "type": "address"
       }
     ],
-    "name": "earned",
+    "name": "earlyTokenData",
     "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "usersList_",
-        "type": "address[]"
-      }
-    ],
-    "name": "earnedList",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "rewardList_",
-        "type": "uint256[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
       {
         "internalType": "address",
-        "name": "user_",
+        "name": "token",
         "type": "address"
-      }
-    ],
-    "name": "earnedTOKEN",
-    "outputs": [
+      },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "totalAmount",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user_",
-        "type": "address"
-      }
-    ],
-    "name": "earnedTOKENNew",
-    "outputs": [
+      },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "totalClaimed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewardPerTokenStored",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewardSingle",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalClaimedSingle",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxSingleReward",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewardDouble",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalClaimedDouble",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxDoubleReward",
         "type": "uint256"
       }
     ],
@@ -731,26 +931,7 @@
         "type": "address[]"
       }
     ],
-    "name": "getBatchUsersBurn",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "burnList",
-        "type": "uint256[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "usersList_",
-        "type": "address[]"
-      }
-    ],
-    "name": "getBatchUsersRewards",
+    "name": "getBatchUsersInfo",
     "outputs": [
       {
         "components": [
@@ -761,42 +942,18 @@
           },
           {
             "internalType": "uint256",
-            "name": "reward",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
             "name": "tokenBalance",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "claimed",
+            "name": "burnToken",
             "type": "uint256"
           }
         ],
-        "internalType": "struct BurnsBonusPool.RetUserReward[]",
+        "internalType": "struct MarketDAO.RetUserInfo[]",
         "name": "data_",
         "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "users_",
-        "type": "address[]"
-      }
-    ],
-    "name": "getDaiRewards",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "rewardList_",
-        "type": "uint256[]"
       }
     ],
     "stateMutability": "view",
@@ -810,21 +967,16 @@
         "type": "address"
       }
     ],
-    "name": "getPhaseData",
+    "name": "getReward",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "singleReward_",
         "type": "uint256"
       },
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "",
+        "name": "doubleReward_",
         "type": "uint256"
       }
     ],
@@ -853,64 +1005,31 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "phase_",
-        "type": "uint256"
-      }
-    ],
-    "name": "getTopRankList",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "rankList_",
-        "type": "address[]"
+        "internalType": "address",
+        "name": "user_",
+        "type": "address"
       },
       {
-        "internalType": "uint256[]",
-        "name": "burnAmountList_",
-        "type": "uint256[]"
+        "internalType": "address",
+        "name": "newToken_",
+        "type": "address"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getTotalInfo",
+    "name": "getUserNewTokenInfo",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "totalBurnWorth_",
+        "name": "",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "totalBurnAmount_",
+        "name": "",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "totalNotifyReward_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "maxBurnBNBAmount_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "maxBurnAmount_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "lastNotifyTime_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "lastNotifyAmount_",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -925,56 +1044,45 @@
         "type": "address"
       }
     ],
-    "name": "getUserInfo",
+    "name": "getUserSingleStakeInfo",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "distribtedReward_",
+        "name": "userNumSingle_",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "claimableReward_",
+        "name": "userEndTimeSingle_",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user_",
+        "type": "address"
+      }
+    ],
+    "name": "getUserSubscribeInfo",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "subscribedNum_",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "burnWorth_",
+        "name": "userNum_",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "outReward_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "daiReward_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "lastQuota_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "rewardTOKEN_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "lastTOKENQuota_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "userRankReward_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "curPhaseRankReward_",
+        "name": "userEndTime_",
         "type": "uint256"
       }
     ],
@@ -1024,13 +1132,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "notifyManager_",
-        "type": "address"
-      }
-    ],
+    "inputs": [],
     "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -1038,65 +1140,7 @@
   },
   {
     "inputs": [],
-    "name": "lastNotifyReward",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount_",
-        "type": "uint256"
-      }
-    ],
-    "name": "notifyReward",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount_",
-        "type": "uint256"
-      }
-    ],
-    "name": "notifyRewardFirst",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "notifyTime",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "phasesRankReward",
+    "name": "maxDoubleReward",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1109,7 +1153,82 @@
   },
   {
     "inputs": [],
-    "name": "refreshAllotedPhases",
+    "name": "maxSingleReward",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newToken_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "singleAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "doubleAmount_",
+        "type": "uint256"
+      }
+    ],
+    "name": "notifyEarlyToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "onERC721Received",
+    "outputs": [
+      {
+        "internalType": "bytes4",
+        "name": "",
+        "type": "bytes4"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "reinitialize",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1151,6 +1270,32 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "rewardDouble",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "rewardSingle",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1158,85 +1303,61 @@
         "type": "uint256"
       }
     ],
-    "name": "rewardPerToken",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "rewardPerTokenStored",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "rewardTOKENPerStored",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "rewards",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "user",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct BurnsBonusPool.DaiParams[]",
-        "name": "dataList_",
-        "type": "tuple[]"
-      }
-    ],
-    "name": "subUsersDaiReward",
+    "name": "stake",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "subscribedNum",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "subscribedNumDoubleValid",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "subscribedNumSingle",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "subscribedNumSingleValid",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1259,14 +1380,100 @@
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "syncSubscibeNum",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "tokenLength",
+    "outputs": [
       {
         "internalType": "uint256",
-        "name": "amount_",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "toBurn",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "tokensMap",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalClaimedDouble",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalClaimedSingle",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalStakeAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "unstake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "unsubscribeDouble",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "unsubscribeSingle",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1274,142 +1481,44 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
+        "internalType": "address[]",
+        "name": "usersList_",
+        "type": "address[]"
       }
     ],
-    "name": "topRank",
+    "name": "updateUserOldNewInvalid",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "userOldIsInvalid",
     "outputs": [
       {
-        "internalType": "uint256",
-        "name": "userNum",
-        "type": "uint256"
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "totalClaimedRankReward",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address",
         "name": "",
-        "type": "uint256"
+        "type": "address"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalClaimedReward",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalClaimedTOKEN",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalNotifyBonusReward",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalNotifyMarketReward",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalNotifyRankReward",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalNotifyReward",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalQuota",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalSupply",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalSupplyTOKEN",
+    "name": "userStakeAmount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1428,7 +1537,7 @@
         "type": "address"
       }
     ],
-    "name": "userClaimedRankRewards",
+    "name": "userStakeTime",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1447,46 +1556,7 @@
         "type": "address"
       }
     ],
-    "name": "userInfos",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "burnTokenAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "burnWorth",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "claimedReward",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "daiReward_feiqi",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "daiReward",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "userRankRewards",
+    "name": "userTokenUpdatedId",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1505,7 +1575,7 @@
         "type": "address"
       }
     ],
-    "name": "userRewardPerTokenPaid",
+    "name": "usersClaimedDouble",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1524,7 +1594,7 @@
         "type": "address"
       }
     ],
-    "name": "userTOKENClaimed",
+    "name": "usersClaimedSingle",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1543,7 +1613,7 @@
         "type": "address"
       }
     ],
-    "name": "userTOKENRewardPerStored",
+    "name": "usersEndTime",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1562,7 +1632,45 @@
         "type": "address"
       }
     ],
-    "name": "userTOKENRewards",
+    "name": "usersEndTimeSingle",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "usersNum",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "usersNumSingle",
     "outputs": [
       {
         "internalType": "uint256",

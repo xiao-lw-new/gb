@@ -425,5 +425,11 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 5,
         ],
+        'event_to_burn' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/chain/event_to_burn.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 5,
+        ],
     ],
 ];

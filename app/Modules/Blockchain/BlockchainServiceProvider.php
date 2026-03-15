@@ -39,6 +39,9 @@ class BlockchainServiceProvider extends ServiceProvider
                 $schedule->command('blockchain:notify-bonus-pool-confirm --confirm-batch=50')
                     ->everyMinute()
                     ->withoutOverlapping();
+                $schedule->command('blockchain:sync-user-gout-info')
+                    ->everyMinute()
+                    ->withoutOverlapping();
             });
         }
     }
