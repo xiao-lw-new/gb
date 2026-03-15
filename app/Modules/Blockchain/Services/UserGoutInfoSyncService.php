@@ -155,23 +155,19 @@ class UserGoutInfoSyncService
             return [];
         }
 
-        // 第一个 32 字节: offset 指向动态数组
-        $arrayOffset = (int) hexdec(substr($hex, 0, 64));
+        $arrayOffset = $this->decodeUint(substr($hex, 0, 64));
         $arrayStart = $arrayOffset * 2;
 
-        // 数组长度
-        $arrayLength = (int) hexdec(substr($hex, $arrayStart, 64));
+        $arrayLength = $this->decodeUint(substr($hex, $arrayStart, 64));
         if ($arrayLength === 0) {
             return [];
         }
 
-        // 跳过 array length 后是每个 tuple 的 offset 列表
         $offsetsStart = $arrayStart + 64;
 
         $result = [];
         for ($i = 0; $i < $arrayLength; $i++) {
-            // 每个 tuple 的 offset（相对于数组数据起始位置）
-            $tupleOffset = (int) hexdec(substr($hex, $offsetsStart + $i * 64, 64));
+            $tupleOffset = $this->decodeUint(substr($hex, $offsetsStart + $i * 64, 64));
             $tupleStart = $arrayStart + 64 + $tupleOffset * 2;
 
             // address (32 bytes, right-aligned)
@@ -194,6 +190,15 @@ class UserGoutInfoSyncService
         }
 
         return $result;
+    }
+
+    /**
+     * 安全解码 ABI 中的小整数偏移/长度值，避免 hexdec 返回 float
+     */
+    private function decodeUint(string $hex64): int
+    {
+        $trimmed = ltrim($hex64, '0') ?: '0';
+        return intval(hexdec($trimmed));
     }
 
 }
