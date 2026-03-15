@@ -145,7 +145,7 @@ class UserGoutInfoSyncService
 
     /**
      * 解码 RetUserInfo[] 返回值
-     * 每个 RetUserInfo = (address user, uint256 tokenBalance, uint256 burnToken)
+     * RetUserInfo 是静态 tuple (address, uint256, uint256)，每个占 96 字节，连续排列无 offset
      */
     private function decodeRetUserInfoArray(string $hex): array
     {
@@ -155,29 +155,35 @@ class UserGoutInfoSyncService
             return [];
         }
 
-        $arrayStart = (int) ($this->hexToInt(substr($hex, 0, 64)) * 2);
-        $arrayLength = $this->hexToInt(substr($hex, $arrayStart, 64));
+        // 第一个 32 字节: offset 指向动态数组（通常为 0x20 = 32 bytes = 64 hex chars）
+        $arrayOffsetHex = ltrim(substr($hex, 0, 64), '0') ?: '0';
+        $arrayStart = (int) (intval($arrayOffsetHex, 16) * 2);
+
+        // 数组长度
+        $arrayLenHex = ltrim(substr($hex, $arrayStart, 64), '0') ?: '0';
+        $arrayLength = intval($arrayLenHex, 16);
         if ($arrayLength === 0) {
             return [];
         }
 
-        $offsetsStart = (int) ($arrayStart + 64);
+        // 静态 tuple 每个占 3 个 slot = 192 hex chars
+        $tupleSize = 192;
+        $dataStart = $arrayStart + 64;
 
         $result = [];
         for ($i = 0; $i < $arrayLength; $i++) {
-            $pos = (int) ($offsetsStart + $i * 64);
-            $tupleOffset = $this->hexToInt(substr($hex, $pos, 64));
-            $tupleStart = (int) ($arrayStart + 64 + $tupleOffset * 2);
+            $tupleStart = (int) ($dataStart + $i * $tupleSize);
 
+            // address (32 bytes, right-aligned, take last 40 hex chars)
             $userHex = substr($hex, $tupleStart, 64);
             $user = '0x' . substr($userHex, 24);
 
-            $tbPos = (int) ($tupleStart + 64);
-            $tokenBalanceHex = ltrim(substr($hex, $tbPos, 64), '0') ?: '0';
+            // uint256 tokenBalance
+            $tokenBalanceHex = ltrim(substr($hex, (int) ($tupleStart + 64), 64), '0') ?: '0';
             $tokenBalance = BigInteger::fromBase($tokenBalanceHex, 16)->__toString();
 
-            $btPos = (int) ($tupleStart + 128);
-            $burnTokenHex = ltrim(substr($hex, $btPos, 64), '0') ?: '0';
+            // uint256 burnToken
+            $burnTokenHex = ltrim(substr($hex, (int) ($tupleStart + 128), 64), '0') ?: '0';
             $burnToken = BigInteger::fromBase($burnTokenHex, 16)->__toString();
 
             $result[] = [
@@ -188,11 +194,6 @@ class UserGoutInfoSyncService
         }
 
         return $result;
-    }
-
-    private function hexToInt(string $hex64): int
-    {
-        return (int) BigInteger::fromBase(ltrim($hex64, '0') ?: '0', 16)->toInt();
     }
 
 }
