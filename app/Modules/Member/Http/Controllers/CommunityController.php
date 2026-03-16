@@ -4,6 +4,7 @@ namespace App\Modules\Member\Http\Controllers;
 
 use App\Models\User;
 use App\Modules\Api\Http\Controllers\BaseApiController;
+use App\Modules\Blockchain\Models\UserGoutInfo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,16 +52,35 @@ class CommunityController extends BaseApiController
         $query = User::where('p_id', $user->id)->orderBy('created_at', 'desc');
         $paginator = $query->paginate($perPage);
 
-        $list = collect($paginator->items())->map(function (User $u) {
+        $userIds = collect($paginator->items())->pluck('id');
+        $goutInfoMap = UserGoutInfo::whereIn('user_id', $userIds)->get()->keyBy('user_id');
+
+        $list = collect($paginator->items())->map(function (User $u) use ($goutInfoMap) {
+            $gout = $goutInfoMap[$u->id] ?? null;
+
             return [
                 'address' => $u->address,
                 'inviteTime' => $u->created_at?->toDateTimeString(),
+                'token_balance' => $gout?->token_balance ?? '0',
+                'burn_amount_new' => $gout?->burn_amount_new ?? '0',
+                'total_burn_amount' => $gout?->total_burn_amount ?? '0',
+                'new_gout_amount' => $gout?->new_gout_amount ?? '0',
+                'is_qualified' => (int) ($gout?->is_qualified ?? 0),
             ];
         });
+
+        $myGout = UserGoutInfo::where('user_id', $user->id)->first();
 
         return $this->success([
             'direct_count' => User::where('p_id', $user->id)->count(),
             'team_count' => $this->getTeamCount((int) $user->id),
+            'gout_info' => [
+                'token_balance' => $myGout?->token_balance ?? '0',
+                'burn_amount_new' => $myGout?->burn_amount_new ?? '0',
+                'total_burn_amount' => $myGout?->total_burn_amount ?? '0',
+                'new_gout_amount' => $myGout?->new_gout_amount ?? '0',
+                'is_qualified' => (int) ($myGout?->is_qualified ?? 0),
+            ],
             'list' => $list,
             'meta' => [
                 'current_page' => $paginator->currentPage(),
