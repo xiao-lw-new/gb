@@ -15,13 +15,6 @@ return new class extends Migration
             ]);
         });
 
-        Schema::table('foundation_qualification_results', function (Blueprint $table) {
-            $table->renameColumn('cond1_value', 'cond1_value');
-            $table->renameColumn('cond2_value', 'cond2_value');
-            $table->renameColumn('cond3_value', 'cond3_value');
-        });
-
-        // 重置所有数据，下次定时任务会重新计算
         \DB::table('foundation_qualification_results')->truncate();
     }
 
