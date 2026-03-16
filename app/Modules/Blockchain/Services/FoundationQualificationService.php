@@ -82,31 +82,31 @@ class FoundationQualificationService
     }
 
     /**
-     * 评估单个用户的 5 个达标条件
+     * 评估单个用户的 3 个达标条件（每个条件都是自己 + 伞下两代的合计）
      */
     private function evaluate(int $userId, UserGoutInfo $info, ?array $team): array
     {
         $totalBurn = (string) $info->total_burn_amount;
         $threshold = bcmul($totalBurn, self::THRESHOLD_RATIO, 18);
 
-        $cond1Value = (string) $info->token_balance;
+        $teamTokenBalance = $team['team_token_balance'] ?? '0';
+        $teamBurnAmount = $team['team_burn_amount'] ?? '0';
+        $teamNewGoutAmount = $team['team_new_gout_amount'] ?? '0';
+
+        // 条件1: 自己 + 伞下两代 持有狗头币合计 >= 阈值
+        $cond1Value = bcadd((string) $info->token_balance, $teamTokenBalance, 18);
         $cond1Met = bccomp($cond1Value, $threshold, 18) >= 0;
 
-        $cond2Value = $team['team_token_balance'] ?? '0';
+        // 条件2: 自己 + 伞下两代 燃烧狗头币合计 >= 阈值
+        $cond2Value = bcadd((string) $info->burn_amount_new, $teamBurnAmount, 18);
         $cond2Met = bccomp($cond2Value, $threshold, 18) >= 0;
 
-        $cond3Value = $team['team_burn_amount'] ?? '0';
+        // 条件3: 自己 + 伞下两代 质押打新合计 >= 阈值
+        $cond3Value = bcadd((string) $info->new_gout_amount, $teamNewGoutAmount, 18);
         $cond3Met = bccomp($cond3Value, $threshold, 18) >= 0;
 
-        $cond4Value = (string) $info->new_gout_amount;
-        $cond4Met = bccomp($cond4Value, $threshold, 18) >= 0;
+        $isQualified = $cond1Met || $cond2Met || $cond3Met;
 
-        $cond5Value = $team['team_new_gout_amount'] ?? '0';
-        $cond5Met = bccomp($cond5Value, $threshold, 18) >= 0;
-
-        $isQualified = $cond1Met || $cond2Met || $cond3Met || $cond4Met || $cond5Met;
-
-        // threshold 为 0 时所有条件都满足（无质押则无需达标）
         if (bccomp($threshold, '0', 18) === 0) {
             $isQualified = false;
         }
@@ -119,10 +119,6 @@ class FoundationQualificationService
             'cond2_met' => $cond2Met ? 1 : 0,
             'cond3_value' => $cond3Value,
             'cond3_met' => $cond3Met ? 1 : 0,
-            'cond4_value' => $cond4Value,
-            'cond4_met' => $cond4Met ? 1 : 0,
-            'cond5_value' => $cond5Value,
-            'cond5_met' => $cond5Met ? 1 : 0,
             'is_qualified' => $isQualified ? 1 : 0,
         ];
     }
