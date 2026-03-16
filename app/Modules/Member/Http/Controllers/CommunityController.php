@@ -70,6 +70,7 @@ class CommunityController extends BaseApiController
         });
 
         $myGout = UserGoutInfo::where('user_id', $user->id)->first();
+        $teamGout = $this->getTeamGoutSums((int) $user->id);
 
         return $this->success([
             'direct_count' => User::where('p_id', $user->id)->count(),
@@ -81,6 +82,7 @@ class CommunityController extends BaseApiController
                 'new_gout_amount' => $myGout?->new_gout_amount ?? '0',
                 'is_qualified' => (int) ($myGout?->is_qualified ?? 0),
             ],
+            'team_gout_info' => $teamGout,
             'list' => $list,
             'meta' => [
                 'current_page' => $paginator->currentPage(),
@@ -89,6 +91,23 @@ class CommunityController extends BaseApiController
                 'total' => $paginator->total(),
             ],
         ]);
+    }
+
+    private function getTeamGoutSums(int $userId): array
+    {
+        $row = DB::table('user_relations as ur')
+            ->join('user_gout_info as ugi', 'ugi.user_id', '=', 'ur.user_id')
+            ->where('ur.ancestor_id', $userId)
+            ->whereIn('ur.distance', [1, 2])
+            ->selectRaw('SUM(ugi.token_balance) as token_balance, SUM(ugi.burn_amount_new) as burn_amount_new, SUM(ugi.total_burn_amount) as total_burn_amount, SUM(ugi.new_gout_amount) as new_gout_amount')
+            ->first();
+
+        return [
+            'token_balance' => $row?->token_balance ?? '0',
+            'burn_amount_new' => $row?->burn_amount_new ?? '0',
+            'total_burn_amount' => $row?->total_burn_amount ?? '0',
+            'new_gout_amount' => $row?->new_gout_amount ?? '0',
+        ];
     }
 
     private function getTeamCount(int $userId): int
