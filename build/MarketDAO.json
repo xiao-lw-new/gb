@@ -810,6 +810,42 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "user_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "num_",
+        "type": "uint256"
+      }
+    ],
+    "name": "addSubscribeNumDouble",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "num_",
+        "type": "uint256"
+      }
+    ],
+    "name": "addSubscribeNumSingle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "newToken_",
         "type": "address"
       }
@@ -948,6 +984,11 @@
           {
             "internalType": "uint256",
             "name": "burnToken",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newAmount",
             "type": "uint256"
           }
         ],

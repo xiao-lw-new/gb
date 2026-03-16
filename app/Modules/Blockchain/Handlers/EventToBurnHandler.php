@@ -41,7 +41,14 @@ class EventToBurnHandler implements EventHandler
         $toThisAmountWei = (string) ($data['toThisAmount'] ?? '0');
 
         $blockNumber = (int) ($meta['block_number'] ?? 0);
-        $blockTime = $blockNumber > 0 ? BlockChainHelper::blockTime($blockNumber) : null;
+        $blockTime = null;
+        if ($blockNumber > 0) {
+            try {
+                $blockTime = BlockChainHelper::blockTime($blockNumber);
+            } catch (\Throwable $e) {
+                Log::channel('event_to_burn')->warning("[EventToBurn]: Failed to get block time for #{$blockNumber}: {$e->getMessage()}");
+            }
+        }
 
         $burnAmount = CommonHelper::fromContractValue($burnAmountWei, 18);
         $addBurnQuota = CommonHelper::fromContractValue($addBurnQuotaWei, 18);

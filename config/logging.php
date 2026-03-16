@@ -431,5 +431,11 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 5,
         ],
+        'foundation_qualification' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/chain/foundation_qualification.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+        ],
     ],
 ];

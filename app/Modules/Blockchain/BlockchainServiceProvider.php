@@ -42,6 +42,9 @@ class BlockchainServiceProvider extends ServiceProvider
                 $schedule->command('blockchain:sync-user-gout-info')
                     ->everyMinute()
                     ->withoutOverlapping();
+                $schedule->command('blockchain:check-foundation-qualification')
+                    ->everyFiveMinutes()
+                    ->withoutOverlapping();
             });
         }
     }

@@ -12,5 +12,11 @@ class UserGoutInfo extends Model
         'burn_amount_new',
         'token_balance',
         'total_burn_amount',
+        'new_gout_amount',
+        'is_qualified',
+    ];
+
+    protected $casts = [
+        'is_qualified' => 'boolean',
     ];
 }

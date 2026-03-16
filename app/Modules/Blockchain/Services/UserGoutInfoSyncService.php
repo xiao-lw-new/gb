@@ -97,12 +97,14 @@ class UserGoutInfoSyncService
 
                 $tokenBalance = CommonHelper::fromContractValue($info['tokenBalance'], 18);
                 $totalBurnAmount = CommonHelper::fromContractValue($info['burnToken'], 18);
+                $newGoutAmount = CommonHelper::fromContractValue($info['newAmount'], 18);
 
                 $goutInfo = UserGoutInfo::updateOrCreate(
                     ['user_id' => $userId],
                     [
                         'token_balance' => $tokenBalance,
                         'total_burn_amount' => $totalBurnAmount,
+                        'new_gout_amount' => $newGoutAmount,
                     ]
                 );
 
@@ -145,7 +147,7 @@ class UserGoutInfoSyncService
 
     /**
      * 解码 RetUserInfo[] 返回值
-     * RetUserInfo 是静态 tuple (address, uint256, uint256)，每个占 96 字节，连续排列无 offset
+     * RetUserInfo 是静态 tuple (address, uint256, uint256, uint256)，每个占 128 字节，连续排列无 offset
      */
     private function decodeRetUserInfoArray(string $hex): array
     {
@@ -166,8 +168,8 @@ class UserGoutInfoSyncService
             return [];
         }
 
-        // 静态 tuple 每个占 3 个 slot = 192 hex chars
-        $tupleSize = 192;
+        // 静态 tuple 每个占 4 个 slot = 256 hex chars
+        $tupleSize = 256;
         $dataStart = $arrayStart + 64;
 
         $result = [];
@@ -186,10 +188,15 @@ class UserGoutInfoSyncService
             $burnTokenHex = ltrim(substr($hex, (int) ($tupleStart + 128), 64), '0') ?: '0';
             $burnToken = BigInteger::fromBase($burnTokenHex, 16)->__toString();
 
+            // uint256 newAmount
+            $newAmountHex = ltrim(substr($hex, (int) ($tupleStart + 192), 64), '0') ?: '0';
+            $newAmount = BigInteger::fromBase($newAmountHex, 16)->__toString();
+
             $result[] = [
                 'user' => strtolower($user),
                 'tokenBalance' => $tokenBalance,
                 'burnToken' => $burnToken,
+                'newAmount' => $newAmount,
             ];
         }
 
