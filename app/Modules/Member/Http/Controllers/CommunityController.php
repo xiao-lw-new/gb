@@ -95,18 +95,20 @@ class CommunityController extends BaseApiController
 
     private function getTeamGoutSums(int $userId): array
     {
-        $row = DB::table('user_relations as ur')
+        $teamRow = DB::table('user_relations as ur')
             ->join('user_gout_info as ugi', 'ugi.user_id', '=', 'ur.user_id')
             ->where('ur.ancestor_id', $userId)
             ->whereIn('ur.distance', [1, 2])
             ->selectRaw('SUM(ugi.token_balance) as token_balance, SUM(ugi.burn_amount_new) as burn_amount_new, SUM(ugi.total_burn_amount) as total_burn_amount, SUM(ugi.new_gout_amount) as new_gout_amount')
             ->first();
 
+        $myGout = UserGoutInfo::where('user_id', $userId)->first();
+
         return [
-            'token_balance' => $row?->token_balance ?? '0',
-            'burn_amount_new' => $row?->burn_amount_new ?? '0',
-            'total_burn_amount' => $row?->total_burn_amount ?? '0',
-            'new_gout_amount' => $row?->new_gout_amount ?? '0',
+            'token_balance' => bcadd((string) ($myGout?->token_balance ?? '0'), (string) ($teamRow?->token_balance ?? '0'), 18),
+            'burn_amount_new' => bcadd((string) ($myGout?->burn_amount_new ?? '0'), (string) ($teamRow?->burn_amount_new ?? '0'), 18),
+            'total_burn_amount' => bcadd((string) ($myGout?->total_burn_amount ?? '0'), (string) ($teamRow?->total_burn_amount ?? '0'), 18),
+            'new_gout_amount' => bcadd((string) ($myGout?->new_gout_amount ?? '0'), (string) ($teamRow?->new_gout_amount ?? '0'), 18),
         ];
     }
 
