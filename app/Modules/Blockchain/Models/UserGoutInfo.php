@@ -15,6 +15,8 @@ class UserGoutInfo extends Model
         'new_gout_amount',
         'is_qualified',
         'invalid_uploaded',
+        'invalid_upload_tx_hash',
+        'invalid_uploaded_at',
     ];
 
     protected $casts = [

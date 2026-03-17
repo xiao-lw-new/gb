@@ -16,7 +16,7 @@ class UploadInvalidUsers extends Command
     {
         $limit = $this->option('limit') ? (int) $this->option('limit') : null;
 
-        $service->upload($limit);
+        $service->setCommand($this)->upload($limit);
 
         return self::SUCCESS;
     }
