@@ -50,10 +50,16 @@ class InvalidUserUploadService
 
         $chunks = $userMap->chunk(self::BATCH_SIZE);
         $batchNum = 0;
+        $totalChunks = $chunks->count();
 
         foreach ($chunks as $chunk) {
             $batchNum++;
             $this->uploadBatch($chunk, $batchNum);
+
+            if ($batchNum < $totalChunks) {
+                $this->output("Waiting 15s for tx confirmation before next batch...");
+                sleep(15);
+            }
         }
 
         $this->output("Done. Total batches: {$batchNum}");
