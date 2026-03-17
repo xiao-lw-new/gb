@@ -65,7 +65,7 @@ class CommunityController extends BaseApiController
                 'burn_amount_new' => $gout?->burn_amount_new ?? '0',
                 'total_burn_amount' => $gout?->total_burn_amount ?? '0',
                 'new_gout_amount' => $gout?->new_gout_amount ?? '0',
-                'is_qualified' => (int) ($gout?->is_qualified ?? 0),
+                'is_qualified' => $this->resolveQualifiedStatus($gout),
             ];
         });
 
@@ -80,7 +80,7 @@ class CommunityController extends BaseApiController
                 'burn_amount_new' => $myGout?->burn_amount_new ?? '0',
                 'total_burn_amount' => $myGout?->total_burn_amount ?? '0',
                 'new_gout_amount' => $myGout?->new_gout_amount ?? '0',
-                'is_qualified' => (int) ($myGout?->is_qualified ?? 0),
+                'is_qualified' => $this->resolveQualifiedStatus($myGout),
             ],
             'team_gout_info' => $teamGout,
             'list' => $list,
@@ -91,6 +91,20 @@ class CommunityController extends BaseApiController
                 'total' => $paginator->total(),
             ],
         ]);
+    }
+
+    /**
+     * 0=未达标, 1=已达标, 2=未参与（无基金会质押）
+     */
+    private function resolveQualifiedStatus(?UserGoutInfo $gout): int
+    {
+        if (!$gout) {
+            return 2;
+        }
+        if (bccomp((string) $gout->total_burn_amount, '0', 18) === 0) {
+            return 2;
+        }
+        return (int) $gout->is_qualified;
     }
 
     private function getTeamGoutSums(int $userId): array

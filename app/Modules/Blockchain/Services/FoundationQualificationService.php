@@ -107,8 +107,11 @@ class FoundationQualificationService
 
         $isQualified = $cond1Met || $cond2Met || $cond3Met;
 
+        // 0=未达标, 1=已达标, 2=未参与（无基金会质押）
         if (bccomp($threshold, '0', 18) === 0) {
-            $isQualified = false;
+            $qualifiedValue = 2;
+        } else {
+            $qualifiedValue = $isQualified ? 1 : 0;
         }
 
         return [
@@ -119,7 +122,7 @@ class FoundationQualificationService
             'cond2_met' => $cond2Met ? 1 : 0,
             'cond3_value' => $cond3Value,
             'cond3_met' => $cond3Met ? 1 : 0,
-            'is_qualified' => $isQualified ? 1 : 0,
+            'is_qualified' => $qualifiedValue,
         ];
     }
 }
