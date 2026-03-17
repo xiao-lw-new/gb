@@ -14,6 +14,7 @@ class UserGoutInfo extends Model
         'total_burn_amount',
         'new_gout_amount',
         'is_qualified',
+        'invalid_uploaded',
     ];
 
     protected $casts = [

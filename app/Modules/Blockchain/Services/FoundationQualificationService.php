@@ -39,9 +39,12 @@ class FoundationQualificationService
                 );
 
                 $info->is_qualified = $result['is_qualified'];
+                if ($result['is_qualified'] == 1 && $info->invalid_uploaded == 1) {
+                    $info->invalid_uploaded = 0;
+                }
                 $info->save();
 
-                if ($result['is_qualified']) {
+                if ($result['is_qualified'] == 1) {
                     $qualifiedCount++;
                 }
             } catch (\Throwable $e) {
