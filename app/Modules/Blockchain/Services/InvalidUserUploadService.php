@@ -3,14 +3,21 @@
 namespace App\Modules\Blockchain\Services;
 
 use App\Models\User;
+use App\Modules\Blockchain\Models\BlockchainRpc;
 use App\Modules\Blockchain\Models\UserGoutInfo;
+use App\Services\SystemSettingService;
 use Illuminate\Support\Facades\Log;
+use Web3\Providers\HttpProvider;
+use Web3\RequestManagers\HttpRequestManager;
+use Web3\Web3;
 
 class InvalidUserUploadService
 {
     private const BATCH_SIZE = 100;
     private const LOG_CHANNEL = 'foundation_qualification';
     private const WALLET_NAME = 'un_qualified';
+    private const TX_CHECK_INTERVAL = 3;
+    private const TX_CHECK_MAX_WAIT = 120;
 
     private ?\Illuminate\Console\Command $command = null;
 
@@ -50,22 +57,21 @@ class InvalidUserUploadService
 
         $chunks = $userMap->chunk(self::BATCH_SIZE);
         $batchNum = 0;
-        $totalChunks = $chunks->count();
 
         foreach ($chunks as $chunk) {
             $batchNum++;
-            $this->uploadBatch($chunk, $batchNum);
+            $success = $this->uploadBatch($chunk, $batchNum);
 
-            if ($batchNum < $totalChunks) {
-                $this->output("Waiting 15s for tx confirmation before next batch...");
-                sleep(15);
+            if (!$success) {
+                $this->output("Batch #{$batchNum} failed, stopping.", true);
+                break;
             }
         }
 
-        $this->output("Done. Total batches: {$batchNum}");
+        $this->output("Done. Total batches processed: {$batchNum}");
     }
 
-    private function uploadBatch($addressMap, int $batchNum): void
+    private function uploadBatch($addressMap, int $batchNum): bool
     {
         $addresses = $addressMap->values()->map(fn ($addr) => strtolower($addr))->toArray();
         $userIds = $addressMap->keys()->toArray();
@@ -79,6 +85,16 @@ class InvalidUserUploadService
             $sender = new ContractSendService('MarketDAO', self::WALLET_NAME);
             $txHash = $sender->writeContract('updateUserOldNewInvalid', [$addresses]);
 
+            $this->output("Batch #{$batchNum} tx submitted: {$txHash}");
+            $this->output("Waiting for tx confirmation...");
+
+            $confirmed = $this->waitForConfirmation($txHash);
+
+            if (!$confirmed) {
+                $this->output("Batch #{$batchNum} tx NOT confirmed within " . self::TX_CHECK_MAX_WAIT . "s: {$txHash}", true);
+                return false;
+            }
+
             UserGoutInfo::whereIn('user_id', $userIds)
                 ->where('invalid_uploaded', 0)
                 ->update([
@@ -87,13 +103,15 @@ class InvalidUserUploadService
                     'invalid_uploaded_at' => now(),
                 ]);
 
-            $this->output("Batch #{$batchNum} success! tx_hash: {$txHash}");
+            $this->output("Batch #{$batchNum} confirmed! tx_hash: {$txHash}");
 
-            Log::channel(self::LOG_CHANNEL)->info('[InvalidUpload]: Batch uploaded.', [
+            Log::channel(self::LOG_CHANNEL)->info('[InvalidUpload]: Batch uploaded and confirmed.', [
                 'count' => count($addresses),
                 'addresses' => $addresses,
                 'tx_hash' => $txHash,
             ]);
+
+            return true;
         } catch (\Throwable $e) {
             $msg = $e->getMessage();
             $this->output("Batch #{$batchNum} FAILED: {$msg}", true);
@@ -101,7 +119,46 @@ class InvalidUserUploadService
                 'addresses' => $addresses,
                 'error' => $msg,
             ]);
+            return false;
         }
+    }
+
+    private function waitForConfirmation(string $txHash): bool
+    {
+        $chainId = SystemSettingService::getChainId();
+        $rpc = BlockchainRpc::where('chain_id', $chainId)->where('status', 1)->first();
+        if (!$rpc) {
+            return false;
+        }
+
+        $web3 = new Web3(new HttpProvider(new HttpRequestManager($rpc->provider, 30)));
+        $waited = 0;
+
+        while ($waited < self::TX_CHECK_MAX_WAIT) {
+            sleep(self::TX_CHECK_INTERVAL);
+            $waited += self::TX_CHECK_INTERVAL;
+
+            $receipt = null;
+            $web3->eth->getTransactionReceipt($txHash, function ($err, $result) use (&$receipt) {
+                if (!$err && $result) {
+                    $receipt = $result;
+                }
+            });
+
+            if ($receipt) {
+                $status = $receipt->status ?? null;
+                if ($status === '0x1' || $status === '1') {
+                    $this->output("Tx confirmed after {$waited}s, status: success");
+                    return true;
+                }
+                $this->output("Tx confirmed after {$waited}s, status: FAILED (reverted)", true);
+                return false;
+            }
+
+            $this->output("  ...waiting ({$waited}s)");
+        }
+
+        return false;
     }
 
     private function output(string $message, bool $isError = false): void
